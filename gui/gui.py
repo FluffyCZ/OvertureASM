@@ -2,7 +2,22 @@ from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QTextEdit, QPushButton, QComboBox, QFileDialog, QMessageBox, QGroupBox
 )
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QFont
+
+from gui.highlighter import OvertureHighlighter
 from assembler import assemble 
+
+class ZoomableTextEditor(QTextEdit):
+    def wheelEvent(self, event):
+        # If user is holding CTRL
+        if event.modifiers() == Qt.ControlModifier:
+            if event.angleDelta().y() > 0:
+                self.zoomIn(1)
+            else:
+                self.zoomOut(1)
+        else:
+            super().wheelEvent(event)
 
 class AssemblerGUI(QMainWindow):
     def __init__(self):
@@ -12,6 +27,7 @@ class AssemblerGUI(QMainWindow):
     def initUI(self):
         self.setWindowTitle("Overture ISA Assembler & Multi-Tool")
         self.resize(900, 600)
+        self.setStyleSheet("QMainWindow { background-color: #262526; color: white; } QLabel { color: white; }")
 
         main_layout = QHBoxLayout()
 
@@ -29,8 +45,23 @@ class AssemblerGUI(QMainWindow):
         
         left_layout.addLayout(left_header)
 
-        self.input_editor = QTextEdit()
+        self.input_editor = ZoomableTextEditor()
         self.input_editor.setPlaceholderText("Enter assembly code here...")
+
+        editor_font = QFont("Consolas", 11)
+        self.input_editor.setFont(editor_font)
+
+        self.input_editor.setStyleSheet("""
+            QTextEdit {
+                background-color: #1e1e1e;
+                color: #dcdcdc;
+                border: 1px solid #3f3f46;
+            }
+        """)
+
+        # Syntax highlighter
+        self.highlighter = OvertureHighlighter(self.input_editor.document())
+
         self.input_editor.setPlainText("start:\n    imm 15\n    mov %r1, %in\n    add\n    mov %out, %r3\n    jmp start")
         left_layout.addWidget(self.input_editor)
 
