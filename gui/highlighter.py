@@ -27,7 +27,7 @@ class OvertureHighlighter(QSyntaxHighlighter):
 
         # Comments (; text) -> Dark green
         comment_format = QTextCharFormat()
-        comment_format.setForeground(QColor("#4D4D4D"))
+        comment_format.setForeground(QColor("#6D6D6D"))
 
         # Instructions
         instructions = [

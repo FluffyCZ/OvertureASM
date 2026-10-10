@@ -6,18 +6,8 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 
 from gui.highlighter import OvertureHighlighter
+from gui.code_editor import CodeEditor
 from assembler import assemble 
-
-class ZoomableTextEditor(QTextEdit):
-    def wheelEvent(self, event):
-        # If user is holding CTRL
-        if event.modifiers() == Qt.ControlModifier:
-            if event.angleDelta().y() > 0:
-                self.zoomIn(1)
-            else:
-                self.zoomOut(1)
-        else:
-            super().wheelEvent(event)
 
 class AssemblerGUI(QMainWindow):
     def __init__(self):
@@ -45,14 +35,14 @@ class AssemblerGUI(QMainWindow):
         
         left_layout.addLayout(left_header)
 
-        self.input_editor = ZoomableTextEditor()
+        self.input_editor = CodeEditor()
         self.input_editor.setPlaceholderText("Enter assembly code here...")
 
         editor_font = QFont("Consolas", 11)
         self.input_editor.setFont(editor_font)
 
         self.input_editor.setStyleSheet("""
-            QTextEdit {
+            QPlainTextEdit {
                 background-color: #1e1e1e;
                 color: #dcdcdc;
                 border: 1px solid #3f3f46;
