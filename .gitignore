@@ -1,0 +1,27 @@
+# --- Python & Cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# --- Type Checking & Linters ---
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# --- Virtual Environments ---
+.venv/
+venv/
+ENV/
+env/
+
+# --- IDEs & Editors (VS Code, PyCharm) ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- Project Local Output Files (ROMs / Text outputs) ---
+*.bin
+program.txt
