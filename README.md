@@ -7,13 +7,15 @@
 ![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ## Features
-- **Two-Pass Assembly:** Full support for automatic label resolution (e.g., `start:`, `jmp start`).
-- **Easy-to-navigate UI:** VS Code-inspired dark mode interface for comfortable coding.
-- **Multi-Format Export:**
-    - Raw binary (`.bin`) for hardware EEPROM programmers.
-    - 8-bit binary strings per line (`.txt`) for HDL simulators (Verilog/VHDL).
-    - Hexadecimal format (`.txt`).
-    - Live in-app debug table view
+- **Advanced Code Editor:** Custom-built IDE experience featuring line numbering, active line highlighting, and smooth zoom control (Ctrl + Scroll).
+- **Rich Syntax Highlighting:** Clear visual differentiation for instructions, registers, immediate values, labels, and comments based on modern dark themes.
+- **Real-Time Linter:** Instant error detection with spellcheck-style red underlining for invalid mnemonics and typos while you type.
+- **Two-Pass Assembly:** Full support for automatic forward and backward label resolution (e.g., `start:`, `jmp start`).
+- **Multi-Format Export:** 
+  - Raw binary (`.bin`) for hardware EEPROM programmers.
+  - 8-bit binary strings per line (`.txt`) for HDL simulators (Verilog/VHDL).
+  - Hexadecimal format (`.txt`).
+  - Live in-app debug table view.
 
 ## Installation & Setup
 
@@ -34,7 +36,7 @@
     ```
 
 ## Example Code (Overture ISA)
-```
+```bash
 start:
     imm 15
     mov %r1, %in
