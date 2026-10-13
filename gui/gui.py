@@ -52,7 +52,7 @@ class AssemblerGUI(QMainWindow):
         # Syntax highlighter
         self.highlighter = OvertureHighlighter(self.input_editor.document())
 
-        self.input_editor.setPlainText("start:\n    imm 15\n    mov %r1, %in\n    add\n    mov %out, %r3\n    jmp start")
+        self.input_editor.setPlainText("; ------ EXAMPLE CODE------\n; ------ THANK YOU FOR USING MY APP ------\nstart:\n    imm 15\n    mov %r1, %in\n    add\n    mov %out, %r3\n    jmp start")
         left_layout.addWidget(self.input_editor)
 
         # --- RIGHT SIDE ---

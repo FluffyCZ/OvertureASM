@@ -17,9 +17,10 @@ class OvertureHighlighter(QSyntaxHighlighter):
         register_format = QTextCharFormat()
         register_format.setForeground(QColor("#9CDCFE"))
 
-        # Numbers (15, 0x0F) -> Lime
+        # Numbers (15, 0x0F) -> Orange
         number_format = QTextCharFormat()
-        number_format.setForeground(QColor("#B5CEA8"))
+        number_format.setForeground(QColor("#FFA500"))
+        number_format.setFontWeight(QFont.Bold)
 
         # Labels (start:) -> Yellow
         label_format = QTextCharFormat()
