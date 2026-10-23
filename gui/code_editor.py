@@ -179,6 +179,10 @@ class CodeEditor(QPlainTextEdit):
                 e.ignore()
                 return
 
+        if e.key() == Qt.Key_Tab:
+            self.insertPlainText("    ")
+            return
+
         super().keyPressEvent(e)
 
         if not hasattr(self, 'completer') or not self.completer:

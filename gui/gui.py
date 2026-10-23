@@ -125,9 +125,37 @@ class AssemblerGUI(QMainWindow):
 
         # Menubar
         menubar = self.menuBar()
+
+        # File menu
+        file_menu = menubar.addMenu("File")
+
+        new_action = QAction("New File", self)
+        new_action.setShortcut("Ctrl+N")
+        new_action.triggered.connect(self.new_file)
+        file_menu.addAction(new_action)
+
+        open_action = QAction("Open", self)
+        open_action.setShortcut("Ctrl+O")
+        open_action.triggered.connect(self.open_file)
+        file_menu.addAction(open_action)
+
+        save_action = QAction("Save As", self)
+        save_action.setShortcut("Ctrl+S")
+        save_action.triggered.connect(self.save_file)
+        file_menu.addAction(save_action)
+
+        file_menu.addSeparator()
+
+        exit_action = QAction("Exit", self)
+        exit_action.setShortcut("Ctrl+Q")
+        exit_action.triggered.connect(self.close)
+        file_menu.addAction(exit_action)
+
+        # Options Menu
         options_menu = menubar.addMenu("Options")
 
-        settings_action = QAction("⚙️ Settings", self)
+        settings_action = QAction("Settings", self)
+        settings_action.setShortcut("Ctrl+I")
         settings_action.triggered.connect(self.open_settings)
         options_menu.addAction(settings_action)
 
@@ -217,6 +245,7 @@ class AssemblerGUI(QMainWindow):
         dlg = SettingsDialog(self, self.current_theme_name, self.themes)
         dlg.exec_()
 
+    # File handling
     def open_file(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open Assembly File", "", "Assembly files (*.asm *.txt);;All files (*.*)")
         if file_path:
@@ -226,6 +255,20 @@ class AssemblerGUI(QMainWindow):
                 self.input_editor.setPlainText(content)
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Cannot open file: {e}")
+
+    def new_file(self):
+        self.input_editor.clear()
+
+    def save_file(self):
+        # Save the source code to (.asm)
+        file_path, _ = QFileDialog.getSaveFileName(self, "Save Source Code", "program.asm", "Assembly files (*.asm);;Text files (*.txt);;All files (*.*)")
+        if file_path:
+            try:
+                with open(file_path, "w", encoding="utf-8") as f:
+                    f.write(self.input_editor.toPlainText())
+                QMessageBox.information(self, "Success", "Source code saved successfully!")
+            except Exception as e:
+                QMessageBox.critical(self, "Error", f"Cannot save file: {e}")
 
     def process_assembly(self):
         asm_code = self.input_editor.toPlainText()
