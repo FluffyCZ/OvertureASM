@@ -1,34 +1,36 @@
 from PyQt5.QtGui import QSyntaxHighlighter, QTextCharFormat, QColor, QFont
 from PyQt5.QtCore import QRegExp
+import json
 
 class OvertureHighlighter(QSyntaxHighlighter):
-    def __init__(self, document) -> None:
+    def __init__(self, document, theme_dict) -> None:
         super().__init__(document)
+        self.set_theme(theme_dict)
+
+    def set_theme(self, theme):
         self.highlightingRules = []
 
-        # Color options
+        def create_format(color_hex, is_bold: bool):
+            fmt = QTextCharFormat()
+            fmt.setForeground(QColor(color_hex))
+            if is_bold:
+                fmt.setFontWeight(QFont.Bold)
+            return fmt
 
         # Instructions (mov, imm, add...) -> Purple/Pink
-        instruction_format = QTextCharFormat()
-        instruction_format.setForeground(QColor("#C586C0"))
-        instruction_format.setFontWeight(QFont.Bold)
+        instruction_format = create_format(theme["instructions-format"], theme["instructions-format-bold"])
 
         # Registers (%r1, %in, %out) -> Cyan
-        register_format = QTextCharFormat()
-        register_format.setForeground(QColor("#9CDCFE"))
+        register_format = create_format(theme["registers-format"], theme["registers-format-bold"])
 
         # Numbers (15, 0x0F) -> Orange
-        number_format = QTextCharFormat()
-        number_format.setForeground(QColor("#FFA500"))
-        number_format.setFontWeight(QFont.Bold)
+        number_format = create_format(theme["numbers-format"], theme["numbers-format-bold"])
 
         # Labels (start:) -> Yellow
-        label_format = QTextCharFormat()
-        label_format.setForeground(QColor("#DCDCAA"))
+        label_format = create_format(theme["labels-format"], theme["labels-format-bold"])
 
         # Comments (; text) -> Gray
-        comment_format = QTextCharFormat()
-        comment_format.setForeground(QColor("#6D6D6D"))
+        comment_format = create_format(theme["comments-format"], theme["comments-format-bold"])
 
         # Instructions
         instructions = [
@@ -53,6 +55,8 @@ class OvertureHighlighter(QSyntaxHighlighter):
 
         # Comments
         self.highlightingRules.append((QRegExp(";[^\n]*"), comment_format))
+
+        self.rehighlight()
 
     def highlightBlock(self, text) -> None:
         for pattern, text_format in self.highlightingRules:

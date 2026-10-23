@@ -18,12 +18,25 @@ class CodeEditor(QPlainTextEdit):
         super().__init__(parent)
         self.lineNumberArea = LineNumberArea(self)
 
+        # Theme colors with sensible defaults
+        self._line_number_bg = QColor("#252526")
+        self._line_number_fg = QColor("#858585")
+        self._current_line_color = QColor("#282828")
+
         self.blockCountChanged.connect(self.updateLineNumberAreaWidth)
         self.updateRequest.connect(self.updateLineNumberArea)
         self.cursorPositionChanged.connect(self.update_selections)
         self.textChanged.connect(self.update_selections)
 
         self.updateLineNumberAreaWidth(0)
+        self.update_selections()
+
+    def set_theme_colors(self, line_number_bg, line_number_fg, current_line):
+        # Update the editor's UI colors from the theme dict
+        self._line_number_bg = QColor(line_number_bg)
+        self._line_number_fg = QColor(line_number_fg)
+        self._current_line_color = QColor(current_line)
+        self.lineNumberArea.update()
         self.update_selections()
 
     def lineNumberAreaWidth(self):
@@ -61,7 +74,7 @@ class CodeEditor(QPlainTextEdit):
 
     def lineNumberAreaPaintEvent(self, event):
         painter = QPainter(self.lineNumberArea)
-        painter.fillRect(event.rect(), QColor("#252526")) 
+        painter.fillRect(event.rect(), self._line_number_bg)
 
         block = self.firstVisibleBlock()
         blockNumber = block.blockNumber()
@@ -71,7 +84,7 @@ class CodeEditor(QPlainTextEdit):
         while block.isValid() and top <= event.rect().bottom():
             if block.isVisible() and bottom >= event.rect().top():
                 number = str(blockNumber + 1)
-                painter.setPen(QColor("#858585"))
+                painter.setPen(self._line_number_fg)
                 painter.drawText(0, int(top), self.lineNumberArea.width() - 5, self.fontMetrics().height(),
                                  Qt.AlignRight, number)
 
@@ -85,8 +98,7 @@ class CodeEditor(QPlainTextEdit):
 
         if not self.isReadOnly():
             selection = QTextEdit.ExtraSelection()
-            lineColor = QColor("#282828")
-            selection.format.setBackground(lineColor)
+            selection.format.setBackground(self._current_line_color)
             selection.format.setProperty(QTextFormat.FullWidthSelection, True)
             selection.cursor = self.textCursor()
             selection.cursor.clearSelection()
