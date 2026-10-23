@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QTextEdit, QPushButton, QComboBox, QFileDialog, QMessageBox, QGroupBox,
-    QAction, QDialog
+    QAction, QDialog, QCompleter
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
@@ -149,6 +149,27 @@ class AssemblerGUI(QMainWindow):
 
         self.input_editor = CodeEditor()
         self.input_editor.setPlaceholderText("Enter assembly code here...")
+
+        # INTELLISENSE
+        isa_words = [
+            "mov", "imm", "nand", "or", "and", "nor", "add", "sub", "nop", "jmp",
+            "jz", "jnz", "jl", "jge", "jle", "jg", "start:",
+            "%r0", "%r1", "%r2", "%r3", "%r4", "%r5", "%in", "%out"
+        ]
+        self.completer = QCompleter(isa_words, self)
+        self.completer.popup().setStyleSheet("""
+            QListView {
+                background-color: #252526;
+                color: #dcdcdc;
+                border: 1px solid #3f3f46;
+                font-family: Consolas;
+                font-size: 13px;
+            }
+            QListView::item:selected {
+                background-color: #3f3f46;
+            }             
+        """)
+        self.input_editor.setCompleter(self.completer)
 
         editor_font = QFont("Consolas", 11)
         self.input_editor.setFont(editor_font)

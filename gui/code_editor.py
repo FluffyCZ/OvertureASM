@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QPlainTextEdit, QWidget, QTextEdit
+from PyQt5.QtWidgets import QPlainTextEdit, QWidget, QTextEdit, QCompleter
 from PyQt5.QtGui import QPainter, QColor, QTextFormat, QTextCursor, QTextCharFormat
 from PyQt5.QtCore import Qt, QRect, QSize
 
@@ -143,3 +143,65 @@ class CodeEditor(QPlainTextEdit):
             self.updateLineNumberAreaWidth(0)
         else:
             super().wheelEvent(event)
+
+    def setCompleter(self, completer):
+        self.completer = completer
+        self.completer.setWidget(self)
+        self.completer.setCompletionMode(QCompleter.PopupCompletion)
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        self.completer.activated.connect(self.insertCompletion)
+
+    def insertCompletion(self, completion):
+        if self.completer.widget() != self:
+            return
+        tc = self.textCursor()
+        extra = len(completion) - len(self.completer.completionPrefix())
+        tc.movePosition(QTextCursor.Left)
+        tc.movePosition(QTextCursor.EndOfWord)
+        tc.insertText(completion[-extra:])
+        self.setTextCursor(tc)
+
+    def textUnderCursor(self):
+        tc = self.textCursor()
+        tc.select(QTextCursor.WordUnderCursor)
+        text = tc.selectedText()
+        # Check if the word is not starting with %
+        tc.movePosition(QTextCursor.StartOfWord)
+        tc.movePosition(QTextCursor.Left, QTextCursor.KeepAnchor)
+
+        if tc.selectedText() == "%":
+            text = '%' + text
+        return text
+
+    def keyPressEvent(self, e):
+        if hasattr(self, 'completer') and self.completer and self.completer.popup().isVisible():
+            if e.key() in (Qt.Key_Enter, Qt.Key_Return, Qt.Key_Escape, Qt.Key_Tab, Qt.Key_Backtab):
+                e.ignore()
+                return
+
+        super().keyPressEvent(e)
+
+        if not hasattr(self, 'completer') or not self.completer:
+            return
+
+        # Key shortcuts ignore
+        ctrlOrShift = e.modifiers() & (Qt.ControlModifier | Qt.ShiftModifier)
+        if ctrlOrShift and e.text() == '':
+            return
+
+        # Read user input
+        completionPrefix = self.textUnderCursor()
+
+        if len(completionPrefix) < 1 or e.text() == '' or completionPrefix[-1].isdigit():
+            self.completer.popup().hide()
+            return
+
+        if completionPrefix != self.completer.completionPrefix():
+            self.completer.setCompletionPrefix(completionPrefix)
+            self.completer.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
+
+        # Popup window under cursor
+        cr = self.cursorRect()
+        cr.setWidth(self.completer.popup().sizeHintForColumn(0)
+                    + self.completer.popup().verticalScrollBar().sizeHint().width())
+        self.completer.complete(cr)
