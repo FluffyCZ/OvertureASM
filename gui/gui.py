@@ -182,7 +182,7 @@ class AssemblerGUI(QMainWindow):
         isa_words = [
             "mov", "imm", "nand", "or", "and", "nor", "add", "sub", "nop", "jmp",
             "jz", "jnz", "jl", "jge", "jle", "jg", "start:",
-            "%r0", "%r1", "%r2", "%r3", "%r4", "%r5", "%r6", "%r7" "%in", "%out"
+            "%r0", "%r1", "%r2", "%r3", "%r4", "%r5", "%r6", "%r7", "%in", "%out"
         ]
         self.completer = QCompleter(isa_words, self)
         self.completer.popup().setStyleSheet("""
