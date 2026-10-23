@@ -1,15 +1,19 @@
 # OvertureASM
 
-- A modern desktop assembler and multi-tool designed for the 8-bit **Overture** Instruction Set Architecture (ISA). Built with **Python** and **PyQt5**.
+A modern desktop assembler and multi-tool designed for the 8-bit **Overture** Instruction Set Architecture (ISA). Built with **Python** and **PyQt5**.
 
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
 ![PyQt5](https://img.shields.io/badge/PyQt5-GUI-green)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
+![XERJ](https://img.shields.io/badge/XERJ-Corpus_Hub-purple)
 
-## Features
+> 🏆 **Featured in the XERJ Corpus Hub:** The custom GUI and theming engine of OvertureASM have been selected as a community-solutions reference for AI coding agents.
+
+## ✨ Key Features
 - **Advanced Code Editor:** Custom-built IDE experience featuring line numbering, active line highlighting, and smooth zoom control (Ctrl + Scroll).
-- **Rich Syntax Highlighting:** Clear visual differentiation for instructions, registers, immediate values, labels, and comments based on modern dark themes.
-- **Real-Time Linter:** Instant error detection with spellcheck-style red underlining for invalid mnemonics and typos while you type.
+- **IntelliSense & Auto-completion:** Smart popup suggestions for ISA mnemonics and hardware registers while you type.
+- **Real-Time Linter:** Instant error detection with spellcheck-style red underlining for invalid instructions and typos.
+- **Dynamic Theming:** Fully customizable JSON-based application appearance (includes Dark and Catppuccin modes).
 - **Two-Pass Assembly:** Full support for automatic forward and backward label resolution (e.g., `start:`, `jmp start`).
 - **Multi-Format Export:** 
   - Raw binary (`.bin`) for hardware EEPROM programmers.
@@ -17,7 +21,7 @@
   - Hexadecimal format (`.txt`).
   - Live in-app debug table view.
 
-## Installation & Setup
+## 🛠️ Installation & Setup
 
 1. **Clone the repository:**
     ```bash
