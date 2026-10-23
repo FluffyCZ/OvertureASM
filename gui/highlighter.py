@@ -42,7 +42,7 @@ class OvertureHighlighter(QSyntaxHighlighter):
             self.highlightingRules.append((QRegExp(pattern), instruction_format))
 
         # Registers (including %)
-        registers = ["%[rR][0-5]\\b", "%in\\b", "%out\\b"]
+        registers = ["%[rR][0-7]\\b", "%in\\b", "%out\\b"]
         for pattern in registers:
             self.highlightingRules.append((QRegExp(pattern), register_format))
 

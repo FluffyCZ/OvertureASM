@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QTextEdit, QPushButton, QComboBox, QFileDialog, QMessageBox, QGroupBox,
-    QAction, QDialog, QCompleter
+    QAction, QDialog, QCompleter, QFontComboBox, QSpinBox
 )
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
@@ -182,7 +182,7 @@ class AssemblerGUI(QMainWindow):
         isa_words = [
             "mov", "imm", "nand", "or", "and", "nor", "add", "sub", "nop", "jmp",
             "jz", "jnz", "jl", "jge", "jle", "jg", "start:",
-            "%r0", "%r1", "%r2", "%r3", "%r4", "%r5", "%in", "%out"
+            "%r0", "%r1", "%r2", "%r3", "%r4", "%r5", "%r6", "%r7" "%in", "%out"
         ]
         self.completer = QCompleter(isa_words, self)
         self.completer.popup().setStyleSheet("""
