@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QPlainTextEdit, QWidget, QTextEdit, QCompleter
 from PyQt5.QtGui import QPainter, QColor, QTextFormat, QTextCursor, QTextCharFormat
 from PyQt5.QtCore import Qt, QRect, QSize
+from gui.editor.intellisense import OvertureCompleter
 
 class LineNumberArea(QWidget):
     def __init__(self, editor):
@@ -27,6 +28,9 @@ class CodeEditor(QPlainTextEdit):
         self.updateRequest.connect(self.updateLineNumberArea)
         self.cursorPositionChanged.connect(self.update_selections)
         self.textChanged.connect(self.update_selections)
+
+        completer = OvertureCompleter(self)
+        self.setCompleter(completer)
 
         self.updateLineNumberAreaWidth(0)
         self.update_selections()
@@ -147,8 +151,6 @@ class CodeEditor(QPlainTextEdit):
     def setCompleter(self, completer):
         self.completer = completer
         self.completer.setWidget(self)
-        self.completer.setCompletionMode(QCompleter.PopupCompletion)
-        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
         self.completer.activated.connect(self.insertCompletion)
 
     def insertCompletion(self, completion):
@@ -179,6 +181,7 @@ class CodeEditor(QPlainTextEdit):
                 e.ignore()
                 return
 
+        # Soft tabs
         if e.key() == Qt.Key_Tab:
             self.insertPlainText("    ")
             return
@@ -203,6 +206,10 @@ class CodeEditor(QPlainTextEdit):
         if completionPrefix != self.completer.completionPrefix():
             self.completer.setCompletionPrefix(completionPrefix)
             self.completer.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
+
+        if self.completer.currentCompletion() == completionPrefix:
+            self.completer.popup().hide()
+            return
 
         # Popup window under cursor
         cr = self.cursorRect()

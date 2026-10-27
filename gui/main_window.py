@@ -1,102 +1,24 @@
 from PyQt5.QtWidgets import (
-    QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QTextEdit, QPushButton, QComboBox, QFileDialog, QMessageBox, QGroupBox,
-    QAction, QDialog, QCompleter, QFontComboBox, QSpinBox
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel,
+    QTextEdit, QPushButton, QComboBox, QFileDialog, QMessageBox,
+    QAction, QCompleter
 )
-from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont
 
-from gui.highlighter import OvertureHighlighter
-from gui.code_editor import CodeEditor
-from assembler import assemble
+from gui.editor.highlighter import OvertureHighlighter
+from gui.editor.code_editor import CodeEditor
+from assembler.assembler import assemble
+from gui.dialogs.settings_dialog import SettingsDialog
+from utils.logger import Logger
 import json
-
-# Settings menu
-class SettingsDialog(QDialog):
-    def __init__(self, parent_gui, current_theme, themes_dict):
-        super().__init__(parent_gui)
-        self.parent_gui = parent_gui
-        self.setWindowTitle("Settings")
-        self.resize(300, 100)
-
-        layout = QVBoxLayout()
-
-        self.theme_label = QLabel("<b>Select Theme:</b>")
-        layout.addWidget(self.theme_label)
-
-        self.theme_combo = QComboBox()
-        self.theme_combo.addItems(themes_dict.keys())
-        self.theme_combo.setCurrentText(current_theme)
-
-        self.theme_combo.currentTextChanged.connect(self.on_theme_changed)
-
-        layout.addWidget(self.theme_combo)
-
-        self.close_btn = QPushButton("Close")
-        self.close_btn.clicked.connect(self.accept)
-        layout.addWidget(self.close_btn)
-
-        self.setLayout(layout)
-
-        # Apply current theme styling to this dialog
-        self.apply_dialog_theme()
-
-    def on_theme_changed(self, theme_name):
-        self.parent_gui.apply_theme(theme_name)
-        self.apply_dialog_theme()
-
-    def apply_dialog_theme(self):
-        # Style the settings dialog to match the active theme.
-        theme = self.parent_gui.current_theme
-        if not theme:
-            return
-
-        bg = theme['background-color']
-        fg = theme['foreground-color']
-        surface = theme.get('ui-surface', bg)
-        border = theme.get('ui-border', '#3f3f46')
-        btn_bg = theme.get('ui-button', '#2b5b84')
-        btn_fg = theme.get('ui-button-text', '#FFFFFF')
-        hover = theme.get('ui-hover', '#3f3f46')
-
-        self.setStyleSheet(f"""
-            QDialog {{
-                background-color: {surface};
-                color: {fg};
-            }}
-            QLabel {{
-                color: {fg};
-            }}
-            QComboBox {{
-                background-color: {bg};
-                color: {fg};
-                border: 1px solid {border};
-                padding: 4px;
-            }}
-            QComboBox QAbstractItemView {{
-                background-color: {bg};
-                color: {fg};
-                selection-background-color: {hover};
-            }}
-            QComboBox::drop-down {{
-                border: none;
-            }}
-            QPushButton {{
-                background-color: {btn_bg};
-                color: {btn_fg};
-                padding: 5px;
-                border: 1px solid {border};
-            }}
-            QPushButton:hover {{
-                background-color: {hover};
-            }}
-        """)
 
 class AssemblerGUI(QMainWindow):
     def __init__(self):
         super().__init__()
         self.current_theme_name = "dark"
         self.current_theme = None
+        self.current_font_family = "Consolas"
+        self.current_font_size = 11
         self.initUI()
 
     def initUI(self):
@@ -107,7 +29,7 @@ class AssemblerGUI(QMainWindow):
             with open("settings.json", "r") as f:
                 self.themes = json.load(f)
         except Exception as e:
-            print("[DEBUG] Selhalo načtení JSON")
+            Logger.warning(f"Couldn't load settings.json {e}\n Creating a fallback settings...")
             # Fallback
             self.themes = {"dark": {
                 "background-color": "#1e1e1e", "foreground-color": "#dcdcdc",
@@ -122,6 +44,13 @@ class AssemblerGUI(QMainWindow):
                 "instructions-format": "#C586C0", "instructions-format-bold": True,
                 "comments-format": "#6A9955", "comments-format-bold": False
             }}
+
+        if "app-settings" not in self.themes:
+            self.themes["app-settings"] = {
+                "current-theme": "dark",
+                "font-family": "Consolas",
+                "font-size": 11
+            }
 
         # Menubar
         menubar = self.menuBar()
@@ -178,30 +107,6 @@ class AssemblerGUI(QMainWindow):
         self.input_editor = CodeEditor()
         self.input_editor.setPlaceholderText("Enter assembly code here...")
 
-        # INTELLISENSE
-        isa_words = [
-            "mov", "imm", "nand", "or", "and", "nor", "add", "sub", "nop", "jmp",
-            "jz", "jnz", "jl", "jge", "jle", "jg", "start:",
-            "%r0", "%r1", "%r2", "%r3", "%r4", "%r5", "%r6", "%r7", "%in", "%out"
-        ]
-        self.completer = QCompleter(isa_words, self)
-        self.completer.popup().setStyleSheet("""
-            QListView {
-                background-color: #252526;
-                color: #dcdcdc;
-                border: 1px solid #3f3f46;
-                font-family: Consolas;
-                font-size: 13px;
-            }
-            QListView::item:selected {
-                background-color: #3f3f46;
-            }             
-        """)
-        self.input_editor.setCompleter(self.completer)
-
-        editor_font = QFont("Consolas", 11)
-        self.input_editor.setFont(editor_font)
-
         # Syntax highlighter
         self.highlighter = OvertureHighlighter(self.input_editor.document(), self.themes["dark"])
 
@@ -239,7 +144,16 @@ class AssemblerGUI(QMainWindow):
         container.setLayout(main_layout)
         self.setCentralWidget(container)
 
-        self.apply_theme("dark")
+        app_settings = self.themes.get("app-settings", {})
+
+        saved_theme = app_settings.get("current-theme", "dark")
+        saved_font_family = app_settings.get("font-family", "Consolas")
+        saved_font_size = app_settings.get("font-size", 11)
+
+        self.apply_theme(saved_theme)
+        self.apply_font(saved_font_family, saved_font_size)
+
+        Logger.system(f"Loaded configuration: Theme='{saved_theme}', Font='{saved_font_family}', Size={saved_font_size}")
 
     def open_settings(self):
         dlg = SettingsDialog(self, self.current_theme_name, self.themes)
@@ -282,7 +196,9 @@ class AssemblerGUI(QMainWindow):
             return
 
         if selected_mode == 3:
-            result_str = f"Translation successfull! Sum of instructions: {len(machine_code)}\n\n"
+            Logger.info(f"Translation successfull! Sum of instructions: {len(machine_code)}")
+
+            result_str = f"Translation successful! Sum of instructions: {len(machine_code)}\n\n"
             result_str += f"{'Address':<8} | {'Hex':<8} | {'Dec':<6} | {'Binary string'}\n"
             result_str += "-" * 45 + "\n"
 
@@ -316,6 +232,17 @@ class AssemblerGUI(QMainWindow):
             
         except Exception as e:
             QMessageBox.critical(self, "Error while saving", str(e))
+            Logger.error(f"Error while saving: {e}")
+
+    def apply_font(self, family: str, size: int):
+        self.current_font_family = family
+        self.current_font_size = size
+        new_font = QFont(family, size)
+        
+        if hasattr(self, 'input_editor') and self.input_editor:
+            self.input_editor.setFont(new_font)
+        if hasattr(self, 'output_viewer') and self.output_viewer:
+            self.output_viewer.setFont(new_font)
 
     def apply_theme(self, theme_name):
         theme = self.themes.get(theme_name, self.themes.get("dark"))
@@ -335,7 +262,7 @@ class AssemblerGUI(QMainWindow):
         ln_fg = theme.get('ui-line-number-fg', '#858585')
         cur_line = theme.get('ui-current-line', '#282828')
 
-        # --- Global application stylesheet ---
+        # Global application stylesheet
         self.setStyleSheet(f"""
             /* Main window */
             QMainWindow {{
@@ -416,7 +343,6 @@ class AssemblerGUI(QMainWindow):
             QTextEdit {{
                 background-color: {bg};
                 color: {fg};
-                font-family: Consolas;
                 border: 1px solid {border};
             }}
 
@@ -470,9 +396,12 @@ class AssemblerGUI(QMainWindow):
             }}
         """)
 
-        # --- Code editor specific colors ---
+        # Code editor specific colors 
         self.input_editor.set_theme_colors(ln_bg, ln_fg, cur_line)
 
-        # --- Syntax highlighter ---
+        # Syntax highlighter
         if hasattr(self, 'highlighter'):
             self.highlighter.set_theme(theme)
+
+        if hasattr(self, 'current_font_family') and hasattr(self, 'current_font_size'):
+            self.apply_font(self.current_font_family, self.current_font_size)

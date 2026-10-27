@@ -1,6 +1,5 @@
 from PyQt5.QtGui import QSyntaxHighlighter, QTextCharFormat, QColor, QFont
 from PyQt5.QtCore import QRegExp
-import json
 
 class OvertureHighlighter(QSyntaxHighlighter):
     def __init__(self, document, theme_dict) -> None:

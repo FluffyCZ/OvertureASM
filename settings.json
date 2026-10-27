@@ -67,5 +67,10 @@
         "instructions-format-bold": true,
         "comments-format": "#a6adc8",
         "comments-format-bold": false
+    },
+    "app-settings": {
+        "font-family": "Consolas",
+        "font-size": 13,
+        "current-theme": "catppuccin"
     }
 }
